@@ -10,20 +10,20 @@ static const char* vShader = "                                \n\
 #version 330                                                  \n\
                                                               \n\
 layout(location=0) in vec2 pos;                               \n\
-                                                              \n\
+uniform float xMove;                                          \n\
                                                               \n\
 void main(){                                                  \n\
-	gl_Position = vec4(pos.x, pos.y, 1.0, 1.0);               \n\
+	gl_Position = vec4(pos.x + xMove, pos.y, 1.0, 1.0);       \n\
 }";
 
 static const char* fShader = "                                \n\
 #version 330                                                  \n\
                                                               \n\
+uniform vec3 triangleColor;                                   \n\
 out vec4 color;                                               \n\
                                                               \n\
-                                                              \n\
 void main(){                                                  \n\
-	color = vec4(1.0, 0.0, 0.0, 1.0);                         \n\
+	color = vec4(triangleColor, 1.0);                         \n\
 }";
 
 
@@ -101,6 +101,10 @@ int main() {
 	CriaTriangulos();
 	CompilaShader();
 
+	//Variaveis para controle da movimentação do triangulo
+	bool direction = true; //true=direita e false=esquerda
+	float triOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.01;
+	
 	while (!glfwWindowShouldClose(mainWindow)) {
 
 		//Habilitar os eventos de usuario
@@ -112,7 +116,33 @@ int main() {
 		//Desenha o triangulo
 		glUseProgram(programa);
 			glBindVertexArray(VAO);
+				/*
+				* Desenha o triangulo
+				*/
 				glDrawArrays(GL_TRIANGLES, 0, 3);
+
+				/*
+				* Alterando a cor do triangulo
+				*/
+				GLuint uniColor = glGetUniformLocation(programa, "triangleColor");
+				float r = (float)rand()/RAND_MAX;
+				float g = (float)rand()/RAND_MAX;
+				float b = (float)rand()/RAND_MAX;
+				glUniform3f(uniColor, r, g, b);
+
+				/*
+				* Mover nosso triangulo
+				*/
+				if (triOffset >= maxOffset || triOffset <= minOffset)
+					direction = !direction;
+
+				if (direction) triOffset += incOffset;
+				else triOffset -= incOffset;
+				//prinf("%d", triOffset);
+				GLuint unixMove = glGetUniformLocation(programa, "xMove");
+				glUniform1f(unixMove, triOffset);
+
+
 			glBindVertexArray(0);
 		glUseProgram(0);
 
