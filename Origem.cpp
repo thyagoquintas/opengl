@@ -1,6 +1,9 @@
 ﻿#include <iostream>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 GLuint VAO, VBO, programa;
 
@@ -10,10 +13,10 @@ static const char* vShader = "                                \n\
 #version 330                                                  \n\
                                                               \n\
 layout(location=0) in vec2 pos;                               \n\
-uniform float xMove;                                          \n\
+uniform mat4 model;                                           \n\
                                                               \n\
 void main(){                                                  \n\
-	gl_Position = vec4(pos.x + xMove, pos.y, 1.0, 1.0);       \n\
+	gl_Position = model * vec4(pos, 1.0, 1.0);                \n\
 }";
 
 static const char* fShader = "                                \n\
@@ -38,11 +41,11 @@ void CriaTriangulos() {
 
 	glGenVertexArrays(1, &VAO); //Cria o VAO
 	glBindVertexArray(VAO); //Coloca o VAO em contexto
-	glGenBuffers(1, &VBO); //Cria o VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
-	glEnableVertexAttribArray(0);
+		glGenBuffers(1, &VBO); //Cria o VBO
+		glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
+		glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //remover do contexto o VBO
 	glBindVertexArray(0); //remover do contexto o VAO
 }
@@ -102,8 +105,10 @@ int main() {
 	CompilaShader();
 
 	//Variaveis para controle da movimentação do triangulo
-	bool direction = true; //true=direita e false=esquerda
-	float triOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.01;
+	bool direction = true, sizeDirection = true, angleDirection = true; //true=direita e false=esquerda
+	float triOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.01f;
+	float size = 0.4f, maxSize = 0.7f, minSize = -0.7f, incSize = 0.01f;
+	float angle = 0.0f, maxAngle = 360.0f, minAngle = -1.0f, incAngle = 0.1f;
 	
 	while (!glfwWindowShouldClose(mainWindow)) {
 
@@ -135,13 +140,31 @@ int main() {
 				*/
 				if (triOffset >= maxOffset || triOffset <= minOffset)
 					direction = !direction;
+				triOffset += direction ? incOffset : incOffset * -1;
 
-				if (direction) triOffset += incOffset;
-				else triOffset -= incOffset;
-				//prinf("%d", triOffset);
-				GLuint unixMove = glGetUniformLocation(programa, "xMove");
-				glUniform1f(unixMove, triOffset);
+				if (size >= maxSize || size <= minSize)
+					sizeDirection = !sizeDirection;
+				size += sizeDirection ? incSize : incSize * -1;
+				
+				if (angle >= maxAngle || angle <= minAngle)
+					angleDirection = !angleDirection;
+				angle += angleDirection ? incAngle : incAngle * -1;
+				printf("%f\n", angle);
 
+				//criar uma matriz 4x4 (1.0f)
+				glm::mat4 model(1.0f);
+
+				//Movimentações do triangulo
+				model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+
+				//Tamanho do triangulo
+				model = glm::scale(model, glm::vec3(size, size, 1.0));
+
+				//Rotação
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+
+				GLuint uniModel = glGetUniformLocation(programa, "model");
+				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
 
 			glBindVertexArray(0);
 		glUseProgram(0);
