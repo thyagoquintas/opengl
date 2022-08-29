@@ -1,3 +1,0 @@
-﻿  Origem.cpp
-C:\Users\thyag\source\repos\CG\Origem.cpp(14,10): warning C4566: caractere representado por nome de caractere universal (UCN) '\uFFFD' não pode ser representado na página de código atual (1252)
-  CG.vcxproj -> C:\Users\thyag\source\repos\CG\x64\Debug\CG.exe
