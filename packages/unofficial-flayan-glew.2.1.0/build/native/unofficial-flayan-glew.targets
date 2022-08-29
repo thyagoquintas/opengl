@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" InitialTargets="unofficial-flayan-glew_init">
+  <PropertyGroup Label="Debug and static and RuntimeLibraryNull" Condition="( $(Configuration.ToLower().IndexOf('debug')) &gt; -1 ) And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'static' And ('$(RuntimeLibrary)' == '')">
+    <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+  </PropertyGroup>
+  <PropertyGroup Label="Release and static and RuntimeLibraryNull" Condition="( $(Configuration.ToLower().IndexOf('debug')) == -1 ) And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'static' And ('$(RuntimeLibrary)' == '')">
+    <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+  </PropertyGroup>
+  <PropertyGroup Label="Default initializers for properties">
+    <Linkage-unofficial-flayan-glew Condition="'$(Linkage-unofficial-flayan-glew)' == ''">dynamic</Linkage-unofficial-flayan-glew>
+    <CallingConvention-unofficial-flayan-glew Condition="'$(CallingConvention-unofficial-flayan-glew)' == ''">cdecl</CallingConvention-unofficial-flayan-glew>
+  </PropertyGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)\default-propertiesui.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(MSBuildThisFileDirectory)\unofficial-flayan-glew-propertiesui-7aadf674-05aa-4248-87ec-ed894cad2a96.xml" />
+  </ItemGroup>
+  <ItemDefinitionGroup Label="static" Condition="'$(Linkage-unofficial-flayan-glew.ToLower())' == 'static'">
+    <ClCompile>
+      <RuntimeLibrary>$(RuntimeLibrary)</RuntimeLibrary>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="x64 and static" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'static'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../..//build/native/lib/x64\static\glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32 and static" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'static'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../..//build/native/lib/Win32\static\glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="x64 and dynamic" Condition="'$(Platform.ToLower())' == 'x64' And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'dynamic'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../..//build/native/lib/x64\dynamic\glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Label="Win32 and dynamic" Condition="'$(Platform.ToLower())' == 'win32' And '$(Linkage-unofficial-flayan-glew.ToLower())' == 'dynamic'">
+    <Link>
+      <AdditionalDependencies>$(MSBuildThisFileDirectory)../..//build/native/lib/Win32\dynamic\glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../..//build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)../..//build/native/include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+  </ItemDefinitionGroup>
+  <UsingTask TaskName="unofficial-flayan-glew_Contains" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll" TaskFactory="CodeTaskFactory">
+    <ParameterGroup>
+      <Text Output="false" ParameterType="System.String" />
+      <Library Output="false" Required="true" ParameterType="System.String" />
+      <Value Output="false" Required="true" ParameterType="System.String" />
+      <Result Output="true" ParameterType="System.String" />
+    </ParameterGroup>
+    <Task>
+      <Code>Result = ((Text ?? "").Split(';').Contains(Library) ) ? Value : String.Empty;</Code>
+    </Task>
+  </UsingTask>
+  <Target Name="unofficial-flayan-glew_init">
+    <unofficial-flayan-glew_Contains Text="Linkage-dynamic" Library="unofficial-flayan-glew" Value="dynamic" Condition="'$(Linkage-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="Linkage-static" Library="unofficial-flayan-glew" Value="static" Condition="'$(Linkage-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="Linkage-ltcg" Library="unofficial-flayan-glew" Value="ltcg" Condition="'$(Linkage-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="Linkage-sxs" Library="unofficial-flayan-glew" Value="sxs" Condition="'$(Linkage-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="Linkage-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="CallingConvention-cdecl" Library="unofficial-flayan-glew" Value="cdecl" Condition="'$(CallingConvention-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="CallingConvention-stdcall" Library="unofficial-flayan-glew" Value="stdcall" Condition="'$(CallingConvention-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="CallingConvention-fastcall" Library="unofficial-flayan-glew" Value="fastcall" Condition="'$(CallingConvention-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="CallingConvention-thiscall" Library="unofficial-flayan-glew" Value="thiscall" Condition="'$(CallingConvention-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+    <unofficial-flayan-glew_Contains Text="CallingConvention-clrcall" Library="unofficial-flayan-glew" Value="clrcall" Condition="'$(CallingConvention-unofficial-flayan-glew)'==''">
+      <Output TaskParameter="Result" PropertyName="CallingConvention-unofficial-flayan-glew" />
+    </unofficial-flayan-glew_Contains>
+  </Target>
+</Project>
