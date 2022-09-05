@@ -12,39 +12,42 @@ GLuint VAO, VBO, programa;
 static const char* vShader = "                                \n\
 #version 330                                                  \n\
                                                               \n\
-layout(location=0) in vec2 pos;                               \n\
+layout(location=0) in vec3 pos;                               \n\
 uniform mat4 model;                                           \n\
+out vec4 vColor;                                              \n\
                                                               \n\
 void main(){                                                  \n\
-	gl_Position = model * vec4(pos, 1.0, 1.0);                \n\
+	gl_Position = model * vec4(pos, 1.0);                     \n\
+    vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);              \n\
 }";
 
 static const char* fShader = "                                \n\
 #version 330                                                  \n\
                                                               \n\
 uniform vec3 triangleColor;                                   \n\
+in vec4 vColor;                                               \n\
 out vec4 color;                                               \n\
                                                               \n\
 void main(){                                                  \n\
-	color = vec4(triangleColor, 1.0);                         \n\
+	color = vColor;                                           \n\
 }";
-
-
 
 void CriaTriangulos() {
 	GLfloat vertices[] = {
 		//x , y		
-		0.0f, 1.0f,
-		-1.0f, -1.0f,
-		1.0f, -1.0f
+		0.0f, 1.0f, 1.0f,           //Vertice 0 (Magenta)
+		-1.0f, -1.0f, 1.0f,         //Vertice 1 (Azul)
+		1.0f, -1.0f, 1.0f          //Vertice 2 (Magenta)
 	};
+
+
 
 	glGenVertexArrays(1, &VAO); //Cria o VAO
 	glBindVertexArray(VAO); //Coloca o VAO em contexto
 		glGenBuffers(1, &VBO); //Cria o VBO
 		glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
-			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
 		glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //remover do contexto o VBO
 	glBindVertexArray(0); //remover do contexto o VAO
