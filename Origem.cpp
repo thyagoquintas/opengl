@@ -5,7 +5,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-GLuint VAO, VBO, programa;
+GLuint VAO, VBO, IBO, programa;
 
 
 //Vertex Shader
@@ -35,20 +35,34 @@ void main(){                                                  \n\
 void CriaTriangulos() {
 	GLfloat vertices[] = {
 		//x , y		
-		0.0f, 1.0f, 1.0f,           //Vertice 0 (Magenta)
-		-1.0f, -1.0f, 1.0f,         //Vertice 1 (Azul)
-		1.0f, -1.0f, 1.0f          //Vertice 2 (Magenta)
+		-1.0f, -1.0f, 0.0f,         //Vertice 1 (Preto)
+		0.0f, 1.0f, 0.0f,           //Vertice 0 (Verde)
+		1.0f, -1.0f, 0.0f,          //Vertice 2 (Vermelho)
+		0.0f, -1.0f, 1.0f            //Vertice 3 (Azul)
 	};
 
-
+	GLuint indices[] = {
+		0, 1, 2,
+		1, 2, 3,
+		0, 1, 3,
+		0, 2, 3
+	};
 
 	glGenVertexArrays(1, &VAO); //Cria o VAO
 	glBindVertexArray(VAO); //Coloca o VAO em contexto
-		glGenBuffers(1, &VBO); //Cria o VBO
-		glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
-		glEnableVertexAttribArray(0);
+
+		glGenBuffers(1, &IBO); //Cria o IBO
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); //Coloca o IBO em contexto
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //Explica o valor do Array
+
+			glGenBuffers(1, &VBO); //Cria o VBO
+			glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
+				glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
+			glEnableVertexAttribArray(0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //remover do contexto o IBO
+
 	glBindBuffer(GL_ARRAY_BUFFER, 0); //remover do contexto o VBO
 	glBindVertexArray(0); //remover do contexto o VAO
 }
@@ -101,6 +115,7 @@ int main() {
 		glfwTerminate();
 		return 1;
 	}
+	glEnable(GL_DEPTH_TEST);
 
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
@@ -111,7 +126,7 @@ int main() {
 	bool direction = true, sizeDirection = true, angleDirection = true; //true=direita e false=esquerda
 	float triOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.01f;
 	float size = 0.4f, maxSize = 0.7f, minSize = -0.7f, incSize = 0.01f;
-	float angle = 0.0f, maxAngle = 360.0f, minAngle = -1.0f, incAngle = 0.1f;
+	float angle = 0.0f, maxAngle = 360.0f, minAngle = -1.0f, incAngle = 0.5f;
 	
 	while (!glfwWindowShouldClose(mainWindow)) {
 
@@ -119,15 +134,17 @@ int main() {
 		glfwPollEvents();
 
 		glClearColor(1.0f, 0.75f, 0.79f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Desenha o triangulo
 		glUseProgram(programa);
 			glBindVertexArray(VAO);
 				/*
-				* Desenha o triangulo
+				* Desenha o triangulo 3D
 				*/
-				glDrawArrays(GL_TRIANGLES, 0, 3);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); //Coloca o IBO em contexto
+					glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //remover do contexto o IBO
 
 				/*
 				* Alterando a cor do triangulo
@@ -152,19 +169,18 @@ int main() {
 				if (angle >= maxAngle || angle <= minAngle)
 					angleDirection = !angleDirection;
 				angle += angleDirection ? incAngle : incAngle * -1;
-				printf("%f\n", angle);
 
 				//criar uma matriz 4x4 (1.0f)
 				glm::mat4 model(1.0f);
 
 				//Movimentações do triangulo
-				model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+				//model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
 
 				//Tamanho do triangulo
-				model = glm::scale(model, glm::vec3(size, size, 1.0));
+				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
 
 				//Rotação
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
 
 				GLuint uniModel = glGetUniformLocation(programa, "model");
 				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
