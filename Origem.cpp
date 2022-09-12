@@ -1,11 +1,16 @@
 ﻿#include <iostream>
+#include <vector>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-GLuint VAO, VBO, IBO, programa;
+#include "Mesh.h"
+
+GLuint programa;
+
+std::vector<Mesh*> meshList;
 
 
 //Vertex Shader
@@ -47,24 +52,15 @@ void CriaTriangulos() {
 		0, 1, 3,
 		0, 2, 3
 	};
+	
+	Mesh* obj1 = new Mesh();
+	obj1->CreateMesh(vertices, sizeof(vertices), indices, sizeof(indices));
+	meshList.push_back(obj1);
 
-	glGenVertexArrays(1, &VAO); //Cria o VAO
-	glBindVertexArray(VAO); //Coloca o VAO em contexto
+	Mesh* obj2 = new Mesh();
+	obj2->CreateMesh(vertices, sizeof(vertices), indices, sizeof(indices));
+	meshList.push_back(obj2);
 
-		glGenBuffers(1, &IBO); //Cria o IBO
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); //Coloca o IBO em contexto
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); //Explica o valor do Array
-
-			glGenBuffers(1, &VBO); //Cria o VBO
-			glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
-				glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Explica o valor do Array
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
-			glEnableVertexAttribArray(0);
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //remover do contexto o IBO
-
-	glBindBuffer(GL_ARRAY_BUFFER, 0); //remover do contexto o VBO
-	glBindVertexArray(0); //remover do contexto o VAO
 }
 
 
@@ -99,7 +95,7 @@ int main() {
 
 	GLFWwindow* mainWindow = glfwCreateWindow(800, 600, "Ola Mundo!", NULL, NULL);
 	if (!mainWindow) {
-		printf("GLFW: Nao foi poss�vel criar a janela");
+		printf("GLFW: Nao foi possivel criar a janela");
 		glfwTerminate();
 		return 1;
 	}
@@ -138,13 +134,6 @@ int main() {
 
 		//Desenha o triangulo
 		glUseProgram(programa);
-			glBindVertexArray(VAO);
-				/*
-				* Desenha o triangulo 3D
-				*/
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO); //Coloca o IBO em contexto
-					glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //remover do contexto o IBO
 
 				/*
 				* Alterando a cor do triangulo
@@ -170,22 +159,29 @@ int main() {
 					angleDirection = !angleDirection;
 				angle += angleDirection ? incAngle : incAngle * -1;
 
+				/*
+				* Triangulo 1
+				*/
+				meshList[0]->RenderMesh();
 				//criar uma matriz 4x4 (1.0f)
 				glm::mat4 model(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); //Movimentações do triangulo
+				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)); //Rotação
+				GLuint uniModel = glGetUniformLocation(programa, "model"); //Encontra a entrada do modelo
+				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
 
-				//Movimentações do triangulo
-				//model = glm::translate(model, glm::vec3(triOffset, triOffset, 0.0f));
+				/*
+				* Triangulo 2
+				*/
+				meshList[1]->RenderMesh();
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f)); //Movimentações do triangulo
+				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
+				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, -1.0f, 0.0f)); //Rotação
+				uniModel = glGetUniformLocation(programa, "model"); //Encontra a entrada do modelo
+				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
 
-				//Tamanho do triangulo
-				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4));
-
-				//Rotação
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-
-				GLuint uniModel = glGetUniformLocation(programa, "model");
-				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model));
-
-			glBindVertexArray(0);
 		glUseProgram(0);
 
 		glfwSwapBuffers(mainWindow);
