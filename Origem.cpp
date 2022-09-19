@@ -7,11 +7,10 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "Mesh.h"
-
-GLuint programa;
+#include "Shader.h"
 
 std::vector<Mesh*> meshList;
-
+std::vector<Shader*> shaderList;
 
 //Vertex Shader
 static const char* vShader = "                                \n\
@@ -19,10 +18,11 @@ static const char* vShader = "                                \n\
                                                               \n\
 layout(location=0) in vec3 pos;                               \n\
 uniform mat4 model;                                           \n\
+uniform mat4 projection;                                      \n\
 out vec4 vColor;                                              \n\
                                                               \n\
 void main(){                                                  \n\
-	gl_Position = model * vec4(pos, 1.0);                     \n\
+	gl_Position = projection * model * vec4(pos, 1.0);        \n\
     vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);              \n\
 }";
 
@@ -60,32 +60,14 @@ void CriaTriangulos() {
 	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, sizeof(vertices), indices, sizeof(indices));
 	meshList.push_back(obj2);
-
 }
 
-
-void CompilaShader() {
-	programa = glCreateProgram(); //Cria um programa
-	GLuint _vShader = glCreateShader(GL_VERTEX_SHADER); //Cria um shader
-	GLuint _fShader = glCreateShader(GL_FRAGMENT_SHADER); //Cria um shader
-
-	//Gambiarra para converter Char em GLChar
-	const GLchar* vCode[1];
-	const GLchar* fCode[1];
-	vCode[0] = vShader; //C�digo do vShader
-	fCode[0] = fShader; //C�digo do fShader
-
-	glShaderSource(_vShader, 1, vCode, NULL); //associa o shader ao codigo
-	glCompileShader(_vShader); //Compila o shader
-	glAttachShader(programa, _vShader); //Adiciona o shader ao programa
-
-	glShaderSource(_fShader, 1, fCode, NULL); //associa o shader ao codigo
-	glCompileShader(_fShader); //Compila o shader
-	glAttachShader(programa, _fShader); //Adiciona o shader ao programa
-
-	glLinkProgram(programa); //Adiciona o programa
-
+void CreateShader() {
+	Shader* shader = new Shader();
+	shader->CreateFromString(vShader, fShader);
+	shaderList.push_back(shader);
 }
+
 
 int main() {
 	if (!glfwInit()) {
@@ -116,7 +98,7 @@ int main() {
 	glViewport(0, 0, bufferWidth, bufferHeight);
 
 	CriaTriangulos();
-	CompilaShader();
+	CreateShader();
 
 	//Variaveis para controle da movimentação do triangulo
 	bool direction = true, sizeDirection = true, angleDirection = true; //true=direita e false=esquerda
@@ -133,16 +115,8 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		//Desenha o triangulo
-		glUseProgram(programa);
-
-				/*
-				* Alterando a cor do triangulo
-				*/
-				GLuint uniColor = glGetUniformLocation(programa, "triangleColor");
-				float r = (float)rand()/RAND_MAX;
-				float g = (float)rand()/RAND_MAX;
-				float b = (float)rand()/RAND_MAX;
-				glUniform3f(uniColor, r, g, b);
+		Shader * shader = shaderList[0];
+		shader->UseProgram();
 
 				/*
 				* Mover nosso triangulo
@@ -165,22 +139,27 @@ int main() {
 				meshList[0]->RenderMesh();
 				//criar uma matriz 4x4 (1.0f)
 				glm::mat4 model(1.0f);
-				model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f)); //Movimentações do triangulo
+				model = glm::translate(model, glm::vec3(0.0f, -0.25f, -1.5f)); //Movimentações do triangulo
 				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
 				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)); //Rotação
-				GLuint uniModel = glGetUniformLocation(programa, "model"); //Encontra a entrada do modelo
-				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+				
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
 
 				/*
 				* Triangulo 2
 				*/
 				meshList[1]->RenderMesh();
 				model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0f)); //Movimentações do triangulo
+				model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f)); //Movimentações do triangulo
 				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
 				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, -1.0f, 0.0f)); //Rotação
-				uniModel = glGetUniformLocation(programa, "model"); //Encontra a entrada do modelo
-				glUniformMatrix4fv(uniModel, 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+
+
+				//Projeção de perspectiva 3D
+				glm::mat4 projection = glm::perspective(1.0f, (GLfloat)bufferWidth / (GLfloat)bufferHeight, 0.1f, 100.0f);
+				
+				glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection)); //Envia os dados para o triangulo
 
 		glUseProgram(0);
 
