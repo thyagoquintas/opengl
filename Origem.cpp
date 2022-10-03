@@ -8,34 +8,15 @@
 
 #include "Mesh.h"
 #include "Shader.h"
+#include "Window.h"
 
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
+Window* window;
 
 //Vertex Shader
-static const char* vShader = "                                \n\
-#version 330                                                  \n\
-                                                              \n\
-layout(location=0) in vec3 pos;                               \n\
-uniform mat4 model;                                           \n\
-uniform mat4 projection;                                      \n\
-out vec4 vColor;                                              \n\
-                                                              \n\
-void main(){                                                  \n\
-	gl_Position = projection * model * vec4(pos, 1.0);        \n\
-    vColor = vec4(clamp(pos, 0.0f, 1.0f), 1.0f);              \n\
-}";
-
-static const char* fShader = "                                \n\
-#version 330                                                  \n\
-                                                              \n\
-uniform vec3 triangleColor;                                   \n\
-in vec4 vColor;                                               \n\
-out vec4 color;                                               \n\
-                                                              \n\
-void main(){                                                  \n\
-	color = vColor;                                           \n\
-}";
+static const char* vertexLocation = "VertexShader.glsl";
+static const char* fragmentLocation = "FragmentShader.glsl";
 
 void CriaTriangulos() {
 	GLfloat vertices[] = {
@@ -64,38 +45,14 @@ void CriaTriangulos() {
 
 void CreateShader() {
 	Shader* shader = new Shader();
-	shader->CreateFromString(vShader, fShader);
+	shader->CreateFromFile(vertexLocation, fragmentLocation);
 	shaderList.push_back(shader);
 }
 
 
 int main() {
-	if (!glfwInit()) {
-		printf("GLFW: Nao pode ser iniciado");
-		return 1;
-	}
-
-	GLFWwindow* mainWindow = glfwCreateWindow(800, 600, "Ola Mundo!", NULL, NULL);
-	if (!mainWindow) {
-		printf("GLFW: Nao foi possivel criar a janela");
-		glfwTerminate();
-		return 1;
-	}
-
-	int bufferWidth, bufferHeight;
-	glfwGetFramebufferSize(mainWindow, &bufferWidth, &bufferHeight);
-
-	glfwMakeContextCurrent(mainWindow);
-
-	if (glewInit() != GLEW_OK) {
-		printf("Glew: Nao pode ser iniciado!");
-		glfwDestroyWindow(mainWindow);
-		glfwTerminate();
-		return 1;
-	}
-	glEnable(GL_DEPTH_TEST);
-
-	glViewport(0, 0, bufferWidth, bufferHeight);
+	window = new Window(1024,768);
+	window->Initialize();
 
 	CriaTriangulos();
 	CreateShader();
@@ -106,7 +63,7 @@ int main() {
 	float size = 0.4f, maxSize = 0.7f, minSize = -0.7f, incSize = 0.01f;
 	float angle = 0.0f, maxAngle = 360.0f, minAngle = -1.0f, incAngle = 0.5f;
 	
-	while (!glfwWindowShouldClose(mainWindow)) {
+	while (!window->ShouldClose()) {
 
 		//Habilitar os eventos de usuario
 		glfwPollEvents();
@@ -157,16 +114,15 @@ int main() {
 
 
 				//Projeção de perspectiva 3D
-				glm::mat4 projection = glm::perspective(1.0f, (GLfloat)bufferWidth / (GLfloat)bufferHeight, 0.1f, 100.0f);
+				glm::mat4 projection = glm::perspective(1.0f, window->GetBufferWidth() / window->GetBufferHeight(), 0.1f, 100.0f);
 				
 				glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection)); //Envia os dados para o triangulo
 
 		glUseProgram(0);
 
-		glfwSwapBuffers(mainWindow);
+		window->SwapBuffers();
 	}
 
-	glfwDestroyWindow(mainWindow);
-	glfwTerminate();
+	window->~Window();
 	return 0;
 }

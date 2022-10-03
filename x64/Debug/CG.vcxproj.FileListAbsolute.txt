@@ -1,0 +1,2 @@
+C:\Users\thyag\source\repos\CG\x64\Debug\CG.exe
+C:\Users\thyag\source\repos\CG\x64\Debug\glew32.dll
