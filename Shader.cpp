@@ -53,6 +53,7 @@ void Shader::Compile(const char* vertexCode, const char* fragmentCode) {
 
 	uniformModel = glGetUniformLocation(shaderId, "model"); //Encontra a entrada do modelo
 	uniformProjection = glGetUniformLocation(shaderId, "projection"); //Encontra a entrada de projeção
+	uniformView = glGetUniformLocation(shaderId, "view"); //Encontra a entrada de projeção
 }
 
 void Shader::UseProgram() {

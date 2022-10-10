@@ -20,6 +20,8 @@ int Window::Initialize(){
 		keys[i] = false;
 	}
 
+	mouseFirstMove = true;
+
 	if (!glfwInit()) {
 		printf("GLFW: Nao pode ser iniciado");
 		return 1;
@@ -50,8 +52,23 @@ int Window::Initialize(){
 	return 0;
 }
 
+GLfloat Window::getXChange()
+{
+	GLfloat change = xChange;
+	xChange = 0;
+	return change;
+}
+
+GLfloat Window::getYChange()
+{
+	GLfloat change = yChange;
+	yChange = 0;
+	return change;
+}
+
 void Window::createCallBacks(){
 	glfwSetKeyCallback(window, handleKeys);
+	glfwSetCursorPosCallback(window, handleMouse);
 }
 
 void Window::handleKeys(GLFWwindow* window, int key, int code, int action, int mode) {
@@ -64,11 +81,30 @@ void Window::handleKeys(GLFWwindow* window, int key, int code, int action, int m
 	if (key >= 0 && key < 1024) {
 		if (action == GLFW_PRESS) {
 			theWindow->keys[key] = true;
-			printf("Pressed: %d\n", key);
+			//printf("Pressed: %d\n", key);
 		}
 		else if (action == GLFW_RELEASE) {
 			theWindow->keys[key] = false;
-			printf("Relessed: %d\n", key);
+			//printf("Relessed: %d\n", key);
 		}
 	}
+}
+
+void Window::handleMouse(GLFWwindow* window, double xPos, double yPos){
+	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
+
+	//É o primeiro movimento?
+	if (theWindow->mouseFirstMove) {
+		theWindow->lastX = xPos;
+		theWindow->lastY = yPos;
+		theWindow->mouseFirstMove = false;
+	}
+
+	theWindow->xChange = xPos - theWindow->lastX;
+	theWindow->yChange = theWindow->lastY - yPos;
+
+	theWindow->lastX = xPos;
+	theWindow->lastY = yPos;
+
+	//printf("x: %.2f | y: %.2f\n", theWindow->xChange, theWindow->yChange);
 }
