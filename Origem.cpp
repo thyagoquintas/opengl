@@ -1,4 +1,6 @@
-﻿#include <iostream>
+﻿#define STB_IMAGE_IMPLEMENTATION
+
+#include <iostream>
 #include <vector>
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
@@ -10,11 +12,14 @@
 #include "Shader.h"
 #include "Window.h"
 #include "Camera.h"
+#include "Texture.h"
 
 std::vector<Mesh*> meshList;
 std::vector<Shader*> shaderList;
 Window* window;
 Camera camera;
+Texture brickTexture;
+Texture groundTexture;
 
 //Vertex Shader
 static const char* vertexLocation = "VertexShader.glsl";
@@ -23,10 +28,10 @@ static const char* fragmentLocation = "FragmentShader.glsl";
 void CriaTriangulos() {
 	GLfloat vertices[] = {
 		//x , y		
-		-1.0f, -1.0f, 0.0f,         //Vertice 1 (Preto)
-		0.0f, 1.0f, 0.0f,           //Vertice 0 (Verde)
-		1.0f, -1.0f, 0.0f,          //Vertice 2 (Vermelho)
-		0.0f, -1.0f, 1.0f            //Vertice 3 (Azul)
+		-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,   //Vertice 1 (x,y,z,u,v)
+		0.0f, 1.0f, 0.0f, 0.5f, 1.0f,     //Vertice 0 (x,y,z,u,v)
+		1.0f, -1.0f, 0.0f, 1.0f, 0.0f,    //Vertice 2 (x,y,z,u,v)
+		0.0f, -1.0f, 1.0f, 0.5f, 0.0f     //Vertice 3 (x,y,z,u,v)
 	};
 
 	GLuint indices[] = {
@@ -62,6 +67,11 @@ int main() {
 	//Criando a camera
 	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 0.05f, 0.05f);
 
+	brickTexture = Texture((char *)"Texture/brick.png");
+	brickTexture.loadTexture();
+	groundTexture = Texture((char*)"Texture/ground.png");
+	groundTexture.loadTexture();
+	
 	//Variaveis para controle da movimentação do triangulo
 	bool direction = true, sizeDirection = true, angleDirection = true; //true=direita e false=esquerda
 	float triOffset = 0.0f, maxOffset = 0.7f, minOffset = -0.7f, incOffset = 0.01f;
@@ -102,6 +112,7 @@ int main() {
 				/*
 				* Triangulo 1
 				*/
+				brickTexture.useTexture();
 				meshList[0]->RenderMesh();
 				//criar uma matriz 4x4 (1.0f)
 				glm::mat4 model(1.0f);
@@ -114,6 +125,7 @@ int main() {
 				/*
 				* Triangulo 2
 				*/
+				groundTexture.useTexture();
 				meshList[1]->RenderMesh();
 				model = glm::mat4(1.0f);
 				model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f)); //Movimentações do triangulo

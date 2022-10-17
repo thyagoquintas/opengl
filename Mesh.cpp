@@ -19,8 +19,10 @@ void Mesh::CreateMesh(GLfloat *vertices, unsigned int numOfVertices, GLuint *ind
 			glGenBuffers(1, &VBO); //Cria o VBO
 			glBindBuffer(GL_ARRAY_BUFFER, VBO); //Coloca o VBO em contexto
 				glBufferData(GL_ARRAY_BUFFER, numOfVertices, vertices, GL_STATIC_DRAW); //Explica o valor do Array
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //Explica os valores de x e y
+				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 5, 0); //Explica os valores de x, y e z
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]) * 5, (void*) (sizeof(vertices[0]) * 3)); //Explica os valores da textura
 			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); //remover do contexto o IBO
 

@@ -1,10 +1,2 @@
 ﻿  Origem.cpp
-  Window.cpp
-C:\Users\thyag\source\repos\CG\Window.cpp(98,22): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-C:\Users\thyag\source\repos\CG\Window.cpp(99,22): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-C:\Users\thyag\source\repos\CG\Window.cpp(103,28): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-C:\Users\thyag\source\repos\CG\Window.cpp(104,40): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-C:\Users\thyag\source\repos\CG\Window.cpp(106,21): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-C:\Users\thyag\source\repos\CG\Window.cpp(107,21): warning C4244: '=': conversão de 'double' para 'GLfloat', possível perda de dados
-  Gerando Código...
   CG.vcxproj -> C:\Users\thyag\source\repos\CG\x64\Debug\CG.exe
