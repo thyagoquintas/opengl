@@ -40,6 +40,18 @@ void CriaTriangulos() {
 		0, 1, 3,
 		0, 2, 3
 	};
+
+	GLfloat floorVertices[] = {
+		-10.0f, 0.0f, -10.0f, 0.0f, 0.0f,
+		-10.0f, 0.0f, 10.0f, 10.0f, 0.0f,
+		10.0f, 0.0f, 10.0f, 10.0f, 10.0f,
+		10.0f, 0.0f, -10.0f, 0.0f, 10.0f
+	};
+
+	GLuint floorIndeices[] = {
+		0, 1, 3,
+		1, 2, 3
+	};
 	
 	Mesh* obj1 = new Mesh();
 	obj1->CreateMesh(vertices, sizeof(vertices), indices, sizeof(indices));
@@ -48,6 +60,10 @@ void CriaTriangulos() {
 	Mesh* obj2 = new Mesh();
 	obj2->CreateMesh(vertices, sizeof(vertices), indices, sizeof(indices));
 	meshList.push_back(obj2);
+
+	Mesh* obj3 = new Mesh();
+	obj3->CreateMesh(floorVertices, sizeof(floorVertices), floorIndeices, sizeof(floorIndeices));
+	meshList.push_back(obj3);
 }
 
 void CreateShader() {
@@ -113,31 +129,41 @@ int main() {
 				* Triangulo 1
 				*/
 				brickTexture.useTexture();
-				meshList[0]->RenderMesh();
+				
 				//criar uma matriz 4x4 (1.0f)
 				glm::mat4 model(1.0f);
 				model = glm::translate(model, glm::vec3(0.0f, -0.25f, -1.5f)); //Movimentações do triangulo
 				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)); //Rotação
-				
+				//model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f)); //Rotação
 				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+				meshList[0]->RenderMesh();
 
 				/*
 				* Triangulo 2
 				*/
-				groundTexture.useTexture();
-				meshList[1]->RenderMesh();
+				brickTexture.useTexture();
 				model = glm::mat4(1.0f);
-				model = glm::translate(model, glm::vec3(0.0f, 0.5f, -2.0f)); //Movimentações do triangulo
+				model = glm::translate(model, glm::vec3(0.0f, -0.25f, -1.5f)); //Movimentações do triangulo
 				model = glm::scale(model, glm::vec3(0.4, 0.4, 0.4)); //Tamanho do triangulo
-				model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, -1.0f, 0.0f)); //Rotação
+				model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0f, -1.0f, 0.0f)); //Rotação
 				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+				meshList[1]->RenderMesh();
+
+				/*
+				* Floor
+				*/
+				groundTexture.useTexture();
+				model = glm::mat4(1.0f);
+				model = glm::translate(model, glm::vec3(0.0f, -0.65f, 0.0f)); //Movimentações do chão
+				glUniformMatrix4fv(shader->GetUniformModel(), 1, GL_FALSE, glm::value_ptr(model)); //Envia os dados para o triangulo
+				meshList[2]->RenderMesh();
 
 
 				//Projeção de perspectiva 3D
 				glm::mat4 projection = glm::perspective(1.0f, window->GetBufferWidth() / window->GetBufferHeight(), 0.1f, 100.0f);
 				glUniformMatrix4fv(shader->GetUniformProjection(), 1, GL_FALSE, glm::value_ptr(projection)); //Envia os dados para o triangulo
 
+				//Camera
 				glUniformMatrix4fv(shader->GetUniformView(), 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
 
 
